@@ -1,13 +1,15 @@
 package com.jnu.accountbook;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -20,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 //import com.jnu.accountbook.InputActivity.InputActivity;
+import com.jnu.accountbook.data.AccountItem;
 import com.jnu.accountbook.data.DataBank;
 
 import java.util.ArrayList;
@@ -32,33 +35,44 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_EDIT = REQUEST_CODE_ADD+1;
     public static final int REQUEST_CODE_DELETE = REQUEST_CODE_ADD+2;
     private List<AccountItem> accountItems;
-    //private DataBank dataBank;
+    private DataBank dataBank;
     private MyRecyclerViewAdapter recyclerViewAdapter;
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_CODE_ADD){
-            if(resultCode== RESULT_CODE_ADD_DATA){
-                String name=data.getStringExtra("name");
-                Double money=data.getDoubleExtra("money",0);
-                int position=data.getIntExtra("position",accountItems.size());
-                accountItems.add(new AccountItem(name,R.drawable.others,money));
+    ActivityResultLauncher<Intent> launcherAdd = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            Intent data = result.getData();
+            int resultCode = result.getResultCode();
+            if (resultCode == RESULT_CODE_ADD_DATA) {
+                if (null == data) return;
+                String name = data.getStringExtra("name");
+                double money = data.getDoubleExtra("money", 0);
+                int position = data.getIntExtra("position", accountItems.size());
+                accountItems.add(position,new AccountItem(name, R.drawable.others, money));
+                dataBank.saveData();
                 recyclerViewAdapter.notifyItemInserted(position);
             }
         }
+    });
 
-        if(requestCode == REQUEST_CODE_EDIT){
-            if(resultCode== RESULT_CODE_ADD_DATA){
-                String name=data.getStringExtra("name");
-                Double money=data.getDoubleExtra("money",0);
-                int position=data.getIntExtra("position",accountItems.size());
+    ActivityResultLauncher<Intent>  launcherEdit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            Intent data = result.getData();
+            int resultCode = result.getResultCode();
+            if(resultCode== RESULT_CODE_ADD_DATA) {
+                if(null==data)return;
+                String name = data.getStringExtra("name");
+                double money = data.getDoubleExtra("money", 0);
+                int position = data.getIntExtra("position", accountItems.size());
                 accountItems.get(position).setName(name);
                 accountItems.get(position).setMoney(money);
+                dataBank.saveData();
                 recyclerViewAdapter.notifyItemChanged(position);
             }
         }
-    }
+    });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +90,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initData(){
-        //dataBank = new DataBank();
-        //accountItems = dataBank.loadData();
-        accountItems = new ArrayList<AccountItem>();
-        accountItems.add(new AccountItem("生活", R.drawable.life,50));
-        accountItems.add(new AccountItem("学习",R.drawable.study,30));
-        accountItems.add(new AccountItem("食物",R.drawable.food,20));
-        accountItems.add(new AccountItem("其他",R.drawable.others,10));
-        accountItems.add(new AccountItem("收入",R.drawable.income,30));
+        dataBank = new DataBank(MainActivity.this);
+        accountItems = dataBank.loadData();
+
     }
 
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter {
@@ -185,7 +194,8 @@ public class MainActivity extends AppCompatActivity {
 */
                         intent =new Intent(MainActivity.this,InputActivity.class);
                         intent.putExtra("position",position);
-                        MainActivity.this.startActivityForResult(intent, REQUEST_CODE_ADD);
+                        launcherAdd.launch(intent);
+                        //MainActivity.this.startActivityForResult(intent, REQUEST_CODE_ADD);
                         break;
 
                     case CONTEXT_MENU_ID_EDIT:
@@ -193,13 +203,14 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("position",position);
                         intent.putExtra("name",accountItems.get(position).getName());
                         intent.putExtra("money",accountItems.get(position).getMoney());
-                        MainActivity.this.startActivityForResult(intent, REQUEST_CODE_EDIT);
+                        //MainActivity.this.startActivityForResult(intent, REQUEST_CODE_EDIT);
+                        launcherEdit.launch(intent);
                         //MyRecyclerViewAdapter.this.notifyItemChanged(position);
                         break;
 
                     case CONTEXT_MENU_ID_DELETE:
                         accountItems.remove(position);
-                        //dataBank.saveData();
+                        dataBank.saveData();
                         MyRecyclerViewAdapter.this.notifyItemRemoved(position);
                         break;
                 }

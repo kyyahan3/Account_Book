@@ -1,6 +1,8 @@
-package com.jnu.accountbook;
+package com.jnu.accountbook.data;
 
-public class AccountItem {
+import java.io.Serializable;
+
+public class AccountItem implements Serializable {
     private String name;
     private int pictureId;
     private double money;
@@ -20,4 +22,8 @@ public class AccountItem {
     public void setName(String name) { this.name = name; }
 
     public void setMoney(double money) { this.money = money; }
+
+    public void setPictureId(int pictureId) {
+        this.pictureId = pictureId;
+    }
 }

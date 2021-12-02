@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,7 +22,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-//import com.jnu.accountbook.InputActivity.InputActivity;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jnu.accountbook.data.AccountItem;
 import com.jnu.accountbook.data.DataBank;
 
@@ -80,6 +81,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initData();
+
+        FloatingActionButton fabAdd=findViewById(R.id.floating_action_button_add);
+        fabAdd.setOnClickListener(view -> {
+            Intent intent=new Intent(this,InputActivity.class);
+            intent.putExtra("position",accountItems.size());
+            launcherAdd.launch(intent);
+        });
 
         RecyclerView mainRecycleView=findViewById(R.id.recycle_view_types);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -155,9 +163,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCreateContextMenu(ContextMenu contextMenu, View v, ContextMenu.ContextMenuInfo menuInfo) {
                 int position=getAdapterPosition();
 
-                MenuItem menuItemAdd=contextMenu.add(Menu.NONE,CONTEXT_MENU_ID_ADD,CONTEXT_MENU_ID_ADD,"Add"+position );
-                MenuItem menuItemEdit=contextMenu.add(Menu.NONE,CONTEXT_MENU_ID_EDIT,CONTEXT_MENU_ID_EDIT,"Edit"+position);
-                MenuItem menuItemDelete=contextMenu.add(Menu.NONE,CONTEXT_MENU_ID_DELETE,CONTEXT_MENU_ID_DELETE,"Delete"+position);
+                MenuItem menuItemAdd=contextMenu.add(Menu.NONE,CONTEXT_MENU_ID_ADD,CONTEXT_MENU_ID_ADD,MainActivity.this.getResources().getString(R.string.string_menu_add));
+                MenuItem menuItemEdit=contextMenu.add(Menu.NONE,CONTEXT_MENU_ID_EDIT,CONTEXT_MENU_ID_EDIT,MainActivity.this.getResources().getString(R.string.string_menu_edit));
+                MenuItem menuItemDelete=contextMenu.add(Menu.NONE,CONTEXT_MENU_ID_DELETE,CONTEXT_MENU_ID_DELETE,MainActivity.this.getResources().getString(R.string.string_menu_delete));
 
                 menuItemAdd.setOnMenuItemClickListener(this);
                 menuItemEdit.setOnMenuItemClickListener(this);
@@ -195,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
                         intent =new Intent(MainActivity.this,InputActivity.class);
                         intent.putExtra("position",position);
                         launcherAdd.launch(intent);
-                        //MainActivity.this.startActivityForResult(intent, REQUEST_CODE_ADD);
                         break;
 
                     case CONTEXT_MENU_ID_EDIT:
@@ -203,15 +210,21 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("position",position);
                         intent.putExtra("name",accountItems.get(position).getName());
                         intent.putExtra("money",accountItems.get(position).getMoney());
-                        //MainActivity.this.startActivityForResult(intent, REQUEST_CODE_EDIT);
                         launcherEdit.launch(intent);
-                        //MyRecyclerViewAdapter.this.notifyItemChanged(position);
                         break;
 
                     case CONTEXT_MENU_ID_DELETE:
-                        accountItems.remove(position);
-                        dataBank.saveData();
-                        MyRecyclerViewAdapter.this.notifyItemRemoved(position);
+                        AlertDialog.Builder alertDB = new AlertDialog.Builder(MainActivity.this);
+                        alertDB.setPositiveButton(MainActivity.this.getResources().getString(R.string.string_confirmation), (dialogInterface, i) -> {
+                            accountItems.remove(position);
+                            dataBank.saveData();
+                            MainActivity.MyRecyclerViewAdapter.this.notifyItemRemoved(position);
+                        });
+                        alertDB.setNegativeButton(MainActivity.this.getResources().getString(R.string.string_cancel), (dialogInterface, i) -> {
+
+                        });
+                        alertDB.setMessage(MainActivity.this.getResources().getString(R.string.string_confirm_delete) +accountItems.get(position).getName()+"？");
+                        alertDB.setTitle(MainActivity.this.getResources().getString(R.string.hint)).show();
                         break;
                 }
                 return false;

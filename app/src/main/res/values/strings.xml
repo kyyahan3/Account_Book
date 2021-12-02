@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Account Book</string>
+
+    <string name="string_menu_add">添加</string>
+    <string name="string_menu_edit">修改</string>
+    <string name="string_menu_delete">删除</string>
+
+    <string name="string_confirmation">确定</string>
+    <string name="string_cancel">取消</string>
+    <string name="string_confirm_delete">你确定要删除</string>
+    <string name="hint">提示</string>
 </resources>

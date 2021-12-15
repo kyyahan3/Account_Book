@@ -27,6 +27,7 @@ import com.jnu.accountbook.data.AccountItem;
 import com.jnu.accountbook.data.DataBank;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -95,6 +96,15 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerViewAdapter = new MyRecyclerViewAdapter(accountItems);
         mainRecycleView.setAdapter(recyclerViewAdapter);
+
+        // 获取当前月份的日期号码
+        TextView textViewDate=findViewById(R.id.text_view_date);;
+        Calendar c = Calendar.getInstance();
+        String mYear = String.valueOf(c.get(Calendar.YEAR));
+        String mMonth = String.valueOf(c.get(Calendar.MONTH) + 1);
+        String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
+        textViewDate.setText(mYear + "." + mMonth + "." + mDay );
+
     }
 
     public void initData(){

@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.Calendar;
+
 public class InputActivity extends AppCompatActivity {
 
     @Override
@@ -15,8 +17,10 @@ public class InputActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input);
 
+
         Intent intent=getIntent();
         int position=intent.getIntExtra("position",0);
+
 
         EditText editTextName=findViewById(R.id.edit_text_name);
         EditText editTextMoney=findViewById(R.id.edit_text_money);

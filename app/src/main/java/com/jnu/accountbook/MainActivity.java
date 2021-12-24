@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +31,8 @@ import com.jnu.accountbook.data.DataBank;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private DataBank dataBank;
     private MyRecyclerViewAdapter recyclerViewAdapter;
 
+
     ActivityResultLauncher<Intent> launcherAdd = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
         public void onActivityResult(ActivityResult result) {
@@ -50,7 +55,23 @@ public class MainActivity extends AppCompatActivity {
                 String name = data.getStringExtra("name");
                 double money = data.getDoubleExtra("money", 0);
                 int position = data.getIntExtra("position", accountItems.size());
-                accountItems.add(position,new AccountItem(name, R.drawable.others, money));
+                switch(name)
+                {
+                    case "life":
+                        accountItems.add(position,new AccountItem(name, R.drawable.life, money));
+                        break;
+                    case "food":
+                        accountItems.add(position,new AccountItem(name, R.drawable.food, money));
+                        break;
+                    case "income":
+                        accountItems.add(position,new AccountItem(name, R.drawable.income, money));
+                        break;
+                    case "study":
+                        accountItems.add(position,new AccountItem(name, R.drawable.study, money));
+                        break;
+                    default:
+                        accountItems.add(position,new AccountItem(name, R.drawable.others, money));
+                }
                 dataBank.saveData();
                 recyclerViewAdapter.notifyItemInserted(position);
             }
@@ -78,8 +99,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         initData();
 
@@ -105,21 +128,8 @@ public class MainActivity extends AppCompatActivity {
         String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
         textViewDate.setText(mYear + "." + mMonth + "." + mDay );
 
-        //计算净资产
-        TextView textViewNetAsset=findViewById(R.id.text_view_amount_net_asset);
-        TextView textViewIncome=findViewById(R.id.text_view_amount_income);
-        TextView textViewSpend=findViewById(R.id.text_view_amount_spend);
-        double income = 0.0;
-        double spend = 0.0;
-        for(int i=0; i<accountItems.size(); i++) {
-            if(accountItems.get(i).getName().equals("income"))
-                income += accountItems.get(i).getMoney();
-            else
-                spend += accountItems.get(i).getMoney();
-        }
-        textViewIncome.setText(String.valueOf(income));
-        textViewSpend.setText(String.valueOf(spend));
-        textViewNetAsset.setText(String.valueOf(income-spend));
+        //计算资产
+        setAsset();
     }
 
     public void initData(){
@@ -254,10 +264,49 @@ public class MainActivity extends AppCompatActivity {
                         alertDB.setTitle(MainActivity.this.getResources().getString(R.string.hint)).show();
                         break;
                 }
+
+                final Timer timer= new Timer();
+                TimerTask task;
+                Handler handler= new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        setAsset();
+                        super.handleMessage(msg);
+                    }
+                };
+
+                task= new TimerTask() {
+                    @Override
+                    public void run() {
+                        Message message = new Message();
+                        message.what = 1;
+                        handler.sendMessage(message);
+                    }
+                };
+                timer.schedule(task,1000,1000);
+
                 return false;
             }
 
-
         }
     }
+
+    private void setAsset() {
+        //计算资产
+        TextView textViewNetAsset=findViewById(R.id.text_view_amount_net_asset);
+        TextView textViewIncome=findViewById(R.id.text_view_amount_income);
+        TextView textViewSpend=findViewById(R.id.text_view_amount_spend);
+        double income = 0.0;
+        double spend = 0.0;
+        for(int i=0; i<accountItems.size(); i++) {
+            if(accountItems.get(i).getName().equals("income"))
+                income += accountItems.get(i).getMoney();
+            else
+                spend += accountItems.get(i).getMoney();
+        }
+        textViewIncome.setText(String.valueOf(income));
+        textViewSpend.setText(String.valueOf(spend));
+        textViewNetAsset.setText(String.valueOf(income-spend));
+    }
+
 }

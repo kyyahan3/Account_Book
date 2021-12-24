@@ -9,4 +9,8 @@
     <string name="string_cancel">取消</string>
     <string name="string_confirm_delete">你确定要删除</string>
     <string name="hint">提示</string>
+    <string name="string_view_net_asset">净资产</string>
+    <string name="string_view_income">收入</string>
+    <string name="string_view_spend">支出</string>
+    <string name="string_view_data">TextView</string>
 </resources>

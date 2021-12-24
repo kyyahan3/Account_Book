@@ -7,8 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import java.util.Calendar;
+import android.widget.ImageView;
 
 public class InputActivity extends AppCompatActivity {
 
@@ -39,6 +38,7 @@ public class InputActivity extends AppCompatActivity {
             intent.putExtra("position",position);
             intent.putExtra("name",editTextName.getText().toString());
             intent.putExtra("money",Double.parseDouble(editTextMoney.getText().toString()));
+
             setResult(MainActivity.RESULT_CODE_ADD_DATA,intent);
             InputActivity.this.finish();
         }

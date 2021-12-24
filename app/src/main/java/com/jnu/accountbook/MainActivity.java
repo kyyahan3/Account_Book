@@ -105,6 +105,21 @@ public class MainActivity extends AppCompatActivity {
         String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
         textViewDate.setText(mYear + "." + mMonth + "." + mDay );
 
+        //计算净资产
+        TextView textViewNetAsset=findViewById(R.id.text_view_amount_net_asset);
+        TextView textViewIncome=findViewById(R.id.text_view_amount_income);
+        TextView textViewSpend=findViewById(R.id.text_view_amount_spend);
+        double income = 0.0;
+        double spend = 0.0;
+        for(int i=0; i<accountItems.size(); i++) {
+            if(accountItems.get(i).getName().equals("income"))
+                income += accountItems.get(i).getMoney();
+            else
+                spend += accountItems.get(i).getMoney();
+        }
+        textViewIncome.setText(String.valueOf(income));
+        textViewSpend.setText(String.valueOf(spend));
+        textViewNetAsset.setText(String.valueOf(income-spend));
     }
 
     public void initData(){
@@ -212,6 +227,8 @@ public class MainActivity extends AppCompatActivity {
 */
                         intent =new Intent(MainActivity.this,InputActivity.class);
                         intent.putExtra("position",position);
+                        intent.putExtra("name",accountItems.get(position).getName());
+                        intent.putExtra("picture",accountItems.get(position).getPictureId());
                         launcherAdd.launch(intent);
                         break;
 
@@ -239,6 +256,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             }
+
+
         }
     }
 }
